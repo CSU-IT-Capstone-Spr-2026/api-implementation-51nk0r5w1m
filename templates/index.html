@@ -134,6 +134,82 @@
         footer a:hover {
             text-decoration: underline;
         }
+
+        .search-form {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .search-form input[type="number"] {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1em;
+            width: 150px;
+        }
+
+        .btn-disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .recent-comics {
+            margin-top: 30px;
+        }
+
+        .recent-comics h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .comics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .comic-card {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .comic-card img {
+            max-width: 100%;
+            height: 200px;
+            object-fit: contain;
+            margin: 10px 0;
+        }
+
+        .comic-card h3 {
+            color: #333;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+
+        .comic-card a {
+            color: #96ceb4;
+            text-decoration: none;
+        }
+
+        .comic-card a:hover {
+            text-decoration: underline;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
     </style>
 </head>
 
@@ -141,6 +217,11 @@
     <header>
         <h1>XKCD Comic Viewer</h1>
         <p class="subtitle">A simple viewer for XKCD comics using the XKCD API</p>
+        <div class="nav-links">
+            <a href="/" class="btn">Latest Comic</a>
+            <a href="/random" class="btn">Random Comic</a>
+            <a href="/recent" class="btn">Recent Comics</a>
+        </div>
     </header>
 
     <main>
@@ -166,7 +247,45 @@
             <p class="comic-date">
                 Published: {{ comic.month }}/{{ comic.day }}/{{ comic.year }}
             </p>
-            <!-- TODO: Add any buttons for navigation, random, or form to fetch comics -->
+            <!-- Feature #4: Navigation (Previous/Next) -->
+            <div class="navigation">
+                {% if comic.num > 1 %}
+                <a href="/comic/{{ comic.num }}/prev" class="btn">Previous</a>
+                {% else %}
+                <span class="btn btn-disabled">Previous</span>
+                {% endif %}
+
+                <a href="/random" class="btn">Random</a>
+
+                {% if latest_num and comic.num < latest_num %}
+                <a href="/comic/{{ comic.num }}/next" class="btn">Next</a>
+                {% else %}
+                <span class="btn btn-disabled">Next</span>
+                {% endif %}
+            </div>
+
+            <!-- Feature #5: Search by Comic Number -->
+            <form class="search-form" action="/search" method="POST">
+                <input type="number" name="comic_num" placeholder="Comic #" min="1" required>
+                <button type="submit" class="btn">Go</button>
+            </form>
+        </div>
+        {% endif %}
+
+        <!-- Feature #6: Display Multiple Recent Comics -->
+        {% if recent_comics and recent_comics|length > 1 %}
+        <div class="recent-comics">
+            <h2>Recent Comics</h2>
+            <div class="comics-grid">
+                {% for rc in recent_comics %}
+                <div class="comic-card">
+                    <h3>{{ rc.title }}</h3>
+                    <p class="comic-number">Comic #{{ rc.num }}</p>
+                    <img src="{{ rc.img }}" alt="{{ rc.alt }}">
+                    <a href="/comic/{{ rc.num }}">View Full Comic</a>
+                </div>
+                {% endfor %}
+            </div>
         </div>
         {% endif %}
     </main>
